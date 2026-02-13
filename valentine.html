@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>For You · my Valentine</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #ffb6c1 0%, #ff9a9e 30%, #fbc2c2 70%, #ffcdd2 100%);
+      background-attachment: fixed;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+      transition: background 0.5s ease;
+    }
+
+    /* BLUSH OVERLAY - appears when she interacts */
+    .blush-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 120, 140, 0.4) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 15;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      mix-blend-mode: soft-light;
+    }
+
+    .blush-overlay.active {
+      opacity: 1;
+    }
+
+    /* floating hearts canvas (background layer) */
+    #floating-hearts-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* main glass card */
+    .glass-card {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 720px;
+      background: rgba(255, 245, 245, 0.2);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-radius: 48px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 30px 60px rgba(190, 70, 100, 0.25), 0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1px 3px rgba(255, 255, 255, 0.6);
+      padding: 2.5rem 2rem;
+      transition: all 0.3s ease;
+      animation: fadeGlow 2s ease-out;
+    }
+
+    @keyframes fadeGlow {
+      0% { opacity: 0; transform: scale(0.96); box-shadow: 0 0 0 rgba(255, 80, 120, 0); }
+      100% { opacity: 1; transform: scale(1); box-shadow: 0 30px 60px rgba(255, 105, 135, 0.3); }
+    }
+
+    /* inner content */
+    .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      color: #2d1a1c;
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.5);
+    }
+
+    /* TYPEWRITER CONTAINER - enhanced */
+    .typewriter-wrap {
+      font-size: clamp(2rem, 10vw, 4rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      padding: 1.2rem 2rem;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: inset 0 1px 4px white;
+      transition: all 0.3s ease;
+    }
+
+    .typewriter-wrap:hover {
+      background: rgba(255, 220, 230, 0.4);
+      transform: scale(1.02);
+    }
+
+    .static-text {
+      color: #a02c4a;
+      white-space: nowrap;
+    }
+
+    #typewriter-name {
+      display: inline-block;
+      min-width: 120px;
+      text-align: left;
+      color: #b1405a;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffebf0, #fff0f5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 2px 2px 10px rgba(255, 160, 180, 0.8);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 4px;
+      height: 1.2em;
+      background-color: #b03a5a;
+      margin-left: 6px;
+      vertical-align: middle;
+      animation: blink 0.9s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* PULSING GLOW HEART BUTTON - enhanced */
+    .heart-pulse-btn {
+      background: none;
+      border: none;
+      font-size: 6rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      filter: drop-shadow(0 0 15px rgba(255, 80, 130, 0.7));
+      animation: pulse-glow 1.8s infinite ease-in-out;
+      margin: 0.5rem 0 0.2rem;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    .heart-pulse-btn::after {
+      content: '✨';
+      position: absolute;
+      top: -10px;
+      right: -20px;
+      font-size: 2rem;
+      opacity: 0;
+      animation: sparkle 2s infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: rotate(0deg); }
+      50% { opacity: 1; transform: rotate(10deg); }
+    }
+
+    .heart-pulse-btn:active {
+      transform: scale(0.9);
+    }
+
+    @keyframes pulse-glow {
+      0% { filter: drop-shadow(0 0 10px #ff80a5) drop-shadow(0 0 20px #ffb3c6); transform: scale(1); }
+      50% { filter: drop-shadow(0 0 25px #ff4d6d) drop-shadow(0 0 45px #ffb3c6); transform: scale(1.07); }
+      100% { filter: drop-shadow(0 0 10px #ff80a5) drop-shadow(0 0 20px #ffb3c6); transform: scale(1); }
+    }
+
+    /* romantic message - interactive */
+    .message {
+      font-size: 1.3rem;
+      background: rgba(255, 240, 245, 0.4);
+      backdrop-filter: blur(4px);
+      padding: 0.8rem 2rem;
+      border-radius: 60px;
+      font-weight: 400;
+      color: #631f31;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 4px 12px rgba(255, 200, 210, 0.5);
+      letter-spacing: 0.3px;
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .message:hover {
+      background: rgba(255, 210, 220, 0.7);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 150, 170, 0.6);
+    }
+
+    .message.blush-message {
+      background: rgba(255, 150, 170, 0.7);
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* LOVE METER - NEW FEATURE */
+    .love-meter {
+      width: 100%;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 60px;
+      padding: 0.8rem 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      color: #792338;
+      letter-spacing: 0.5px;
+    }
+
+    .meter-bar {
+      height: 16px;
+      background: rgba(255, 220, 230, 0.3);
+      border-radius: 30px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 70%;
+      background: linear-gradient(90deg, #ffb3c6, #ff4d6d);
+      border-radius: 30px;
+      transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 0 15px #ff80a5;
+    }
+
+    /* second glass row for details - enhanced */
+    .footer-note {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #792338;
+    }
+
+    .footer-note span {
+      background: rgba(255, 255, 255, 0.3);
+      padding: 0.5rem 1.4rem;
+      border-radius: 40px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .footer-note span:hover {
+      background: rgba(255, 200, 215, 0.6);
+      transform: scale(1.05);
+    }
+
+    /* PETAL ANIMATION CONTAINER - NEW */
+    .petal-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .petal {
+      position: absolute;
+      background: rgba(255, 200, 215, 0.6);
+      border-radius: 150% 0 150% 0;
+      width: 20px;
+      height: 25px;
+      transform: rotate(45deg);
+      animation: fall linear infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(180deg);
+        opacity: 0;
+      }
+    }
+
+    /* canvas for fireworks */
+    #fireworks-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* audio player */
+    #romantic-audio {
+      display: none;
+    }
+
+    /* interaction hint */
+    .hint {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      background: rgba(255, 220, 230, 0.5);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      animation: gentlePulse 2s infinite;
+    }
+
+    @keyframes gentlePulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    /* BLUSH BUTTON - NEW */
+    .blush-btn {
+      background: rgba(255, 220, 230, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      color: #a02c4a;
+      padding: 0.5rem 1.5rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+      margin-top: 0.5rem;
+    }
+
+    .blush-btn:hover {
+      background: rgba(255, 150, 170, 0.8);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .blush-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* COMPLIMENT CARD - NEW */
+    .compliment-card {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      border-radius: 30px;
+      padding: 1rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      font-size: 1.2rem;
+      color: #631f31;
+      text-align: center;
+      transition: all 0.3s ease;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .compliment-card.blushing {
+      background: rgba(255, 150, 170, 0.5);
+      transform: scale(1.02);
+    }
+
+    /* responsiveness */
+    @media (max-width: 500px) {
+      .glass-card { padding: 2rem 1.5rem; border-radius: 36px; }
+      .heart-pulse-btn { font-size: 5rem; }
+      .message { font-size: 1.1rem; }
+      .typewriter-wrap { padding: 0.8rem 1.2rem; }
+      .compliment-card { font-size: 1rem; padding: 0.8rem 1rem; }
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- blush overlay (appears on interaction) -->
+  <div class="blush-overlay" id="blushOverlay"></div>
+
+  <!-- floating hearts canvas -->
+  <canvas id="floating-hearts-canvas"></canvas>
+
+  <!-- falling petals (romantic touch) -->
+  <div class="petal-container" id="petalContainer"></div>
+
+  <!-- main glass card -->
+  <main class="glass-card">
+    <div class="content">
+
+      <!-- typewriter area -->
+      <div class="typewriter-wrap">
+        <span class="static-text">Happy Valentine's,</span>
+        <span id="typewriter-name"></span>
+        <span class="cursor"></span>
+      </div>
+
+      <!-- glowing pulse heart button (main interaction) -->
+      <button class="heart-pulse-btn" id="heartButton" aria-label="I love you">❤️</button>
+
+      <!-- dreamy message (click to blush) -->
+      <div class="message" id="romanticMessage">
+        ✦ you make my heart flutter ✦
+      </div>
+
+      <!-- COMPLIMENT CARD - changes when she interacts -->
+      <div class="compliment-card" id="complimentCard">
+        ✨ you're beautiful ✨
+      </div>
+
+      <!-- LOVE METER - fills up with love -->
+      <div class="love-meter">
+        <div class="meter-label">
+          <span>💕 love level</span>
+          <span id="lovePercentage">70%</span>
+        </div>
+        <div class="meter-bar">
+          <div class="meter-fill" id="loveMeterFill" style="width: 70%"></div>
+        </div>
+      </div>
+
+      <!-- blush button - extra blush trigger -->
+      <button class="blush-btn" id="blushButton">💗 make her blush 💗</button>
+
+      <!-- footer romantic touches -->
+      <div class="footer-note">
+        <span>💌 forever & always</span>
+        <span>🌸 feb 14</span>
+      </div>
+      <div class="hint">❤️ tap anything — she blushes + music plays</div>
+    </div>
+  </main>
+
+  <!-- hidden audio - LOVELY SONG (perfect romantic track) -->
+  <audio id="romantic-audio" loop preload="auto">
+    <!-- MOST LOVELY SONG: "Canon in D" style romantic piano -->
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3" type="audio/mp3">
+    <!-- Backup: equally romantic -->
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mp3">
+    Your browser doesn't support audio.
+  </audio>
+
+  <!-- fireworks canvas -->
+  <canvas id="fireworks-canvas"></canvas>
+
+  <script>
+    (function() {
+      // ==============================================
+      // CUSTOMIZE FOR HER
+      // ==============================================
+      const herName = 'ANNASTACIA';  // <--- CHANGE TO HER NAME
+      const compliments = [
+        "✨ you're beautiful ✨",
+        "💕 you take my breath away",
+        "🌸 you're perfect",
+        "💖 my heart races for you",
+        "🌹 you're a dream",
+        "💗 absolutely stunning",
+        "✨ the most beautiful soul",
+        "💕 you make me smile",
+        "🌟 you're everything",
+        "💘 I'm so lucky to know you"
+      ];
+      let complimentIndex = 0;
+
+      // ==============================================
+      // BLUSH SYSTEM
+      // ==============================================
+      const blushOverlay = document.getElementById('blushOverlay');
+      const romanticMessage = document.getElementById('romanticMessage');
+      const complimentCard = document.getElementById('complimentCard');
+      const loveMeterFill = document.getElementById('loveMeterFill');
+      const lovePercentage = document.getElementById('lovePercentage');
+      let blushIntensity = 0;
+      let loveLevel = 70;
+
+      function makeHerBlush(intensity = 1) {
+        // Activate blush overlay
+        blushOverlay.classList.add('active');
+        
+        // Increase love meter
+        loveLevel = Math.min(100, loveLevel + Math.floor(Math.random() * 5) + 2);
+        loveMeterFill.style.width = loveLevel + '%';
+        lovePercentage.textContent = loveLevel + '%';
+        
+        // Blush intensity affects overlay opacity
+        blushOverlay.style.opacity = 0.3 + (blushIntensity * 0.1);
+        
+        // Change compliment
+        complimentIndex = (complimentIndex + 1) % compliments.length;
+        complimentCard.textContent = compliments[complimentIndex];
+        complimentCard.classList.add('blushing');
+        
+        // Message blush effect
+        romanticMessage.classList.add('blush-message');
+        romanticMessage.textContent = "💕 awww I love you so much! 💕";
+        
+        // Remove blush effects after delay
+        setTimeout(() => {
+          blushOverlay.classList.remove('active');
+          romanticMessage.classList.remove('blush-message');
+          romanticMessage.textContent = "✦ you make my heart flutter ✦";
+          complimentCard.classList.remove('blushing');
+        }, 2000);
+        
+        // Increment blush intensity (max 5)
+        blushIntensity = Math.min(5, blushIntensity + 0.5);
+        
+        // Create blush particles (tiny hearts)
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => {
+            createBlushHeart();
+          }, i * 100);
+        }
+      }
+
+      // ==============================================
+      // BLUSH HEARTS (floating from cursor)
+      // ==============================================
+      function createBlushHeart() {
+        // Reuse floating hearts canvas to add a burst of hearts
+        const heartCanvas = document.getElementById('floating-hearts-canvas');
+        const ctx = heartCanvas.getContext('2d');
+        // This is handled by the main animation but we'll add extra hearts
+        // to the hearts array
+        if (heartsArray) {
+          for (let i = 0; i < 8; i++) {
+            heartsArray.push({
+              x: width * 0.5 + (Math.random() - 0.5) * 200,
+              y: height * 0.7,
+              size: 15 + Math.random() * 25,
+              speedY: 0.8 + Math.random() * 1.5,
+              speedX: (Math.random() - 0.5) * 0.8,
+              opacity: 0.8,
+              pulse: 1,
+              color: '#ff4d6d'
+            });
+          }
+        }
+      }
+
+      // ==============================================
+      // TYPEWRITER EFFECT
+      // ==============================================
+      const nameElement = document.getElementById('typewriter-name');
+      let index = 0;
+      let isDeleting = false;
+      let typewriterTimer;
+
+      function typewriterStep() {
+        if (!isDeleting && index <= herName.length) {
+          nameElement.innerText = herName.substring(0, index);
+          index++;
+          if (index > herName.length) {
+            clearTimeout(typewriterTimer);
+            typewriterTimer = setTimeout(() => {
+              isDeleting = true;
+              typewriterStep();
+            }, 2000);
+            return;
+          }
+        } else if (isDeleting && index >= 0) {
+          nameElement.innerText = herName.substring(0, index);
+          index--;
+          if (index < 0) {
+            isDeleting = false;
+            index = 0;
+          }
+        }
+        const speed = isDeleting ? 70 : 130;
+        typewriterTimer = setTimeout(typewriterStep, speed);
+      }
+      typewriterStep();
+
+      // ==============================================
+      // FLOATING HEARTS
+      // ==============================================
+      const heartCanvas = document.getElementById('floating-hearts-canvas');
+      const ctxHeart = heartCanvas.getContext('2d');
+      let width, height;
+      let heartsArray = [];
+
+      function initHearts() {
+        const count = 30;
+        heartsArray = [];
+        for (let i = 0; i < count; i++) {
+          heartsArray.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: 10 + Math.random() * 24,
+            speedY: 0.2 + Math.random() * 0.8,
+            speedX: (Math.random() - 0.5) * 0.2,
+            opacity: 0.3 + Math.random() * 0.4,
+            pulse: 0.5 + Math.random() * 0.5,
+          });
+        }
+      }
+
+      function drawHearts() {
+        if (!ctxHeart) return;
+        ctxHeart.clearRect(0, 0, width, height);
+        heartsArray.forEach(h => {
+          ctxHeart.font = `${h.size}px 'Segoe UI', 'Arial Unicode MS', sans-serif`;
+          ctxHeart.textAlign = 'center';
+          ctxHeart.textBaseline = 'middle';
+          ctxHeart.globalAlpha = h.opacity * (0.8 + 0.2 * Math.sin(Date.now() * 0.002 * h.pulse));
+          ctxHeart.fillStyle = '#ffb3c6';
+          ctxHeart.shadowColor = '#ff4d6d';
+          ctxHeart.shadowBlur = 12;
+          ctxHeart.fillText('❤️', h.x, h.y);
+          
+          h.y -= h.speedY;
+          h.x += h.speedX;
+          
+          if (h.y < -50) {
+            h.y = height + 30;
+            h.x = Math.random() * width;
+          }
+          if (h.x < -30) h.x = width + 30;
+          if (h.x > width + 30) h.x = -30;
+        });
+        requestAnimationFrame(drawHearts);
+      }
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        heartCanvas.width = width;
+        heartCanvas.height = height;
+        initHearts();
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+      drawHearts();
+
+      // ==============================================
+      // FALLING PETALS
+      // ==============================================
+      const petalContainer = document.getElementById('petalContainer');
+      for (let i = 0; i < 20; i++) {
+        createPetal();
+      }
+      
+      function createPetal() {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.animationDuration = 5 + Math.random() * 7 + 's';
+        petal.style.animationDelay = Math.random() * 5 + 's';
+        petal.style.background = `rgba(255, ${180 + Math.random() * 40}, ${200 + Math.random() * 55}, ${0.4 + Math.random() * 0.3})`;
+        petal.style.width = 10 + Math.random() * 20 + 'px';
+        petal.style.height = 15 + Math.random() * 25 + 'px';
+        petalContainer.appendChild(petal);
+      }
+
+      // ==============================================
+      // FIREWORKS
+      // ==============================================
+      const fireCanvas = document.getElementById('fireworks-canvas');
+      const ctxFire = fireCanvas.getContext('2d');
+      let particles = [];
+
+      function resizeFireworks() {
+        fireCanvas.width = window.innerWidth;
+        fireCanvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeFireworks);
+      resizeFireworks();
+
+      function createExplosion(centerX, centerY) {
+        const count = 80;
+        const colors = ['#ff4d6d', '#ff8fa3', '#ffb3c6', '#ffffff', '#ffd166', '#ff99c8', '#f25f8c', '#ffb347'];
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * 2 * Math.PI;
+          const speed = 2 + Math.random() * 8;
+          const vx = Math.cos(angle) * speed;
+          const vy = Math.sin(angle) * speed - 1;
+          particles.push({
+            x: centerX,
+            y: centerY,
+            vx: vx,
+            vy: vy,
+            size: 3 + Math.random() * 10,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            alpha: 1,
+            life: 1,
+            decay: 0.01 + Math.random() * 0.02,
+            gravity: 0.04,
+          });
+        }
+      }
+
+      function drawFireworks() {
+        if (!ctxFire) return;
+        ctxFire.clearRect(0, 0, fireCanvas.width, fireCanvas.height);
+        ctxFire.globalCompositeOperation = 'lighter';
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha = p.life;
+          p.life -= p.decay;
+
+          ctxFire.globalAlpha = p.alpha;
+          ctxFire.beginPath();
+          ctxFire.arc(p.x, p.y, p.size * 0.8, 0, Math.PI * 2);
+          ctxFire.fillStyle = p.color;
+          ctxFire.shadowColor = '#ffb3c6';
+          ctxFire.shadowBlur = 16;
+          ctxFire.fill();
+
+          if (p.life <= 0.02 || p.y > fireCanvas.height + 50) {
+            particles.splice(i, 1);
+          }
+        }
+        ctxFire.globalCompositeOperation = 'source-over';
+        requestAnimationFrame(drawFireworks);
+      }
+      drawFireworks();
+
+      // ==============================================
+      // MUSIC AND INTERACTIONS
+      // ==============================================
+      const audio = document.getElementById('romantic-audio');
+      const heartBtn = document.getElementById('heartButton');
+      const blushBtn = document.getElementById('blushButton');
+
+      function playMusicOnce() {
+        if (audio.paused) {
+          audio.play().catch(e => console.log('interaction needed'));
+        }
+      }
+
+      // Heart button - fireworks + blush
+      heartBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        playMusicOnce();
+        makeHerBlush(2);
+        
+        const rect = heartBtn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 4; i++) {
+          setTimeout(() => {
+            createExplosion(centerX + (Math.random()-0.5)*60, centerY + (Math.random()-0.5)*60);
+          }, i * 80);
+        }
+        createExplosion(centerX, centerY);
+      });
+
+      // Blush button
+      blushBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        playMusicOnce();
+        makeHerBlush(1.5);
+        
+        // Small heart burst
+        const rect = blushBtn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        createExplosion(centerX, centerY - 20);
+      });
+
+      // Romantic message click
+      romanticMessage.addEventListener('click', function() {
+        playMusicOnce();
+        makeHerBlush(1);
+      });
+
+      // Compliment card click
+      complimentCard.addEventListener('click', function() {
+        playMusicOnce();
+        makeHerBlush(0.8);
+      });
+
+      // Any tap starts music
+      document.body.addEventListener('touchstart', function once() {
+        playMusicOnce();
+        document.body.removeEventListener('touchstart', once);
+      }, { passive: true, once: true });
+      
+      document.body.addEventListener('click', function once() {
+        playMusicOnce();
+        document.body.removeEventListener('click', once);
+      }, { once: true });
+
+      // ==============================================
+      // INIT
+      // ==============================================
+      window.addEventListener('load', () => {
+        audio.load();
+      });
+
+    })();
+  </script>
+</body>
+</html>
